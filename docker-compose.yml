@@ -1,0 +1,14 @@
+services:
+  autoapply-bot:
+    build: .
+    container_name: autoapply-bot-v2
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chrome_profile:/app/chrome_profile
+      - ./bot/uploads:/app/bot/uploads
+      - ./bot/config.json:/app/bot/config.json
+    environment:
+      - AUTO_APPLY_HEADLESS=1
+      - PORT=8000
+    restart: unless-stopped

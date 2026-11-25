@@ -1,0 +1,22 @@
+# Personal session & sensitive config
+chrome_profile/
+**/chrome_profile/
+config.json
+**/config.json
+session_cookies.json
+**/session_cookies.json
+bot/uploads/*
+!bot/uploads/.gitkeep
+
+# Logs & scraped job data
+*.csv
+
+# Debug screenshots (preserve official app logo)
+*.png
+!bot/static/logo.png
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+.env

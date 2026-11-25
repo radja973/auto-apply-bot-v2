@@ -1,0 +1,17 @@
+{
+  "keywords": "Java Spring Boot",
+  "location": "Indonesia",
+  "domicile": "Jakarta Timur, DKI Jakarta",
+  "remote_only": false,
+  "experience_level": ["entry_level", "associate", "mid_senior"],
+  "email": "your.email@example.com",
+  "phone_number": "81234567890",
+  "country_code": "+62",
+  "resume_pdf_path": "C:\\path\\to\\your_resume.pdf",
+  "years_of_experience_default": "1",
+  "current_salary": "5000000",
+  "expected_salary": "10000000",
+  "max_jobs_to_apply": 30,
+  "delay_between_applications_min_sec": 4,
+  "delay_between_applications_max_sec": 8
+}

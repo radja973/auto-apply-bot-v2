@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#0A66C2" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  <title>AutoApply Bot v2</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --primary: #0a66c2;
+      --primary-soft: #eff6ff;
+      --teal: #0d9488;
+      --danger: #dc2626;
+      --text: #0f172a;
+      --muted: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 40px;
+    }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text);
+    }
+
+    .input-error {
+      border: 1.5px solid var(--danger) !important;
+      background: #fef2f2 !important;
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .badge.running {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 95px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 12px 14px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn.teal {
+      background: var(--teal);
+    }
+
+    .btn.secondary {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .btn.danger {
+      background: var(--danger);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .log-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      border-radius: 10px;
+      height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .prompt-box {
+      border: 2px solid var(--primary);
+      background: var(--primary-soft);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .prompt-box.visible {
+      display: block;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-pill {
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #334155;
+      display: inline-block;
+    }
+
+    .status-pill.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-pill.info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-pill.warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-pill.err {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .msg {
+      font-size: 13px;
+      margin-top: 8px;
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .lang-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand" style="display:flex; align-items:center; gap:10px;">
+      <img src="/logo.png" alt="AutoApply Bot" style="width:28px; height:28px; border-radius:7px;" />
+      <span>AutoApply Bot v2</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="lang-switch" aria-label="Language">
+        <button id="langIdBtn" class="lang-btn active" onclick="setLanguage('id')">ID</button>
+        <button id="langEnBtn" class="lang-btn" onclick="setLanguage('en')">EN</button>
+      </div>
+      <div id="statusBadge" class="badge">Idle</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <button id="tabBtn-control" class="tab-btn active" data-i18n="tab_control" onclick="switchTab('control', this)">Kontrol Bot</button>
+      <button id="tabBtn-profile" class="tab-btn" data-i18n="tab_profile" onclick="switchTab('profile', this)">Profil &amp; CV</button>
+      <button id="tabBtn-history" class="tab-btn" data-i18n="tab_history" onclick="switchTab('history', this)">Riwayat Lamaran</button>
+    </div>
+
+    <!-- TAB 1: KONTROL -->
+    <div id="tab-control" class="panel active">
+      <div id="promptBox" class="prompt-box">
+        <strong data-i18n="prompt_title" style="display:block; margin-bottom:6px;">Pertanyaan Form Membutuhkan Jawaban
+          Anda:</strong>
+        <div id="promptQuestion" style="font-size:14px; margin-bottom:10px; white-space:pre-line; line-height:1.45;">
+        </div>
+        <div id="promptOptions"></div>
+        <div id="promptTextWrap" style="display:flex; gap:8px; margin-top:8px;">
+          <input id="promptInput" type="text" data-i18n-placeholder="prompt_placeholder"
+            placeholder="Ketik jawaban di sini (kosong = skip)" />
+          <button class="btn" data-i18n="btn_send" onclick="submitPromptText()">Kirim</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="run_title">Jalankan Otomasi</h2>
+        <div class="btn-row">
+          <button class="btn" id="btnLinkedin" onclick="startBot('linkedin')">LinkedIn Easy Apply</button>
+          <button class="btn teal" id="btnGlints" onclick="startBot('glints')">Glints Auto-Apply</button>
+          <button class="btn secondary" id="btnBoth" data-i18n="btn_both" onclick="startBot('both')">Jalankan
+            Keduanya</button>
+          <button class="btn danger" id="btnStop" data-i18n="btn_stop" onclick="stopBot()" disabled>Hentikan</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="logs_title">Log Aktivitas Real-Time</h2>
+        <div id="logBox" class="log-box" data-i18n="logs_empty">Siap dijalankan. Pastikan profil &amp; CV sudah diatur
+          di tab Profil.</div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PROFIL & CV -->
+    <div id="tab-profile" class="panel">
+      <div class="card">
+        <h2 data-i18n="upload_title">Unggah Resume PDF (Dari iPhone / Android / Laptop)</h2>
+        <input type="file" id="resumeFile" accept=".pdf" />
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+          <button class="btn teal" data-i18n="btn_upload" onclick="uploadResume()">Upload Resume PDF</button>
+          <span id="resumeMsg" class="msg"></span>
+        </div>
+        <div id="currentResume" style="font-size:12px; color:var(--muted); margin-top:8px;"></div>
+
+        <hr style="border:none; border-top:1px solid var(--border); margin:16px 0;" />
+
+        <h2 data-i18n="upload_port_title">Upload Portfolio PDF</h2>
+        <input type="file" id="portfolioFile" accept=".pdf" />
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+          <button class="btn secondary" data-i18n="btn_upload_port" onclick="uploadPortfolio()">Upload</button>
+          <span id="portfolioMsg" class="msg"></span>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border); margin:16px 0;" />
+
+        <h2 data-i18n="upload_port_link_title">Upload Portfolio Link (Opsional)</h2>
+        <input id="cfg_portfolio_url" type="url" data-i18n-placeholder="ph_portfolio_url" placeholder="Tempel link Portfolio (GitHub / Website / Drive)" />
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+          <button class="btn secondary" data-i18n="btn_upload_port_link" onclick="savePortfolioLink()">Upload</button>
+          <span id="portfolioLinkMsg" class="msg"></span>
+        </div>
+        <div id="currentPortfolio" style="font-size:12px; color:var(--muted); margin-top:8px;"></div>
+
+        <hr style="border:none; border-top:1px solid var(--border); margin:16px 0;" />
+
+        <h2 data-i18n="upload_cl_title">Upload Cover Letter PDF (Opsional)</h2>
+        <input type="file" id="coverLetterFile" accept=".pdf" />
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+          <button class="btn secondary" data-i18n="btn_upload_cl" onclick="uploadCoverLetter()">Upload</button>
+          <span id="coverLetterMsg" class="msg"></span>
+        </div>
+        <div id="currentCoverLetter" style="font-size:12px; color:var(--muted); margin-top:8px;"></div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="settings_title">Pengaturan Pencarian &amp; Data Lamaran</h2>
+        <div class="grid">
+          <div><label data-i18n="lbl_keywords">Kata Kunci Pekerjaan (pisahkan koma, cth: HRD, Human
+              Resources)</label><input id="cfg_keywords" type="text" /></div>
+          <div><label data-i18n="lbl_location">Lokasi Pencarian</label><input id="cfg_location" type="text" /></div>
+          <div><label data-i18n="lbl_domicile">Domisili / Kota</label><input id="cfg_domicile" type="text" /></div>
+          <div><label data-i18n="lbl_email">Email Akun</label><input id="cfg_email" type="email" /></div>
+          <div><label data-i18n="lbl_country_code">Kode Negara</label><input id="cfg_country_code" type="text" /></div>
+          <div><label data-i18n="lbl_phone">No. HP (tanpa 0/+62)</label><input id="cfg_phone_number" type="text" />
+          </div>
+          <div><label data-i18n="lbl_years">Pengalaman (Tahun)</label><input id="cfg_years" type="text" /></div>
+          <div><label data-i18n="lbl_curr_salary">Gaji Saat Ini</label><input id="cfg_current_salary" type="text" />
+          </div>
+          <div><label data-i18n="lbl_exp_salary">Ekspektasi Gaji</label><input id="cfg_expected_salary" type="text" />
+          </div>
+          <div><label data-i18n="lbl_max_jobs">Maksimal Lamaran / Sesi</label><input id="cfg_max_jobs" type="number" />
+          </div>
+          <div>
+            <label data-i18n="lbl_job_type">Jenis Pekerjaan</label>
+            <select id="cfg_job_type">
+              <option value="semua" data-i18n="opt_all">Semua</option>
+              <option value="full_time">Full Time</option>
+              <option value="part_time">Part Time</option>
+              <option value="freelance">Freelance</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+          <div>
+            <label data-i18n="lbl_exp_level">Level Pengalaman (pisahkan koma, tanpa _)</label>
+            <input id="cfg_exp_levels" type="text" placeholder="cth: Entry Level, Associate, Mid-Senior" />
+          </div>
+          <div>
+            <label data-i18n="lbl_strict">Fokus Ketat Bidang Pekerjaan</label>
+            <select id="cfg_strict_title">
+              <option value="true" data-i18n="opt_strict_yes">Ya — Judul harus cocok dengan kata kunci
+                (Direkomendasikan)</option>
+              <option value="false" data-i18n="opt_strict_no">Tidak — Ikuti semua hasil pencarian portal</option>
+            </select>
+          </div>
+          <div>
+            <label data-i18n="lbl_exclude">Posisi yang Dihindari (Opsional)</label>
+            <input id="cfg_exclude_keywords" type="text" data-i18n-placeholder="ph_exclude"
+              placeholder="cth: Senior, Manager, Magang, Sales" />
+          </div>
+        </div>
+        <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+          <button class="btn" data-i18n="btn_save_cfg" onclick="saveConfig()">Simpan Pengaturan</button>
+          <span id="saveMsg" class="msg"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="hrd_title">Email HRD Otomatis</h2>
+        <div id="hrdStatus" style="font-size:12px; color:var(--muted); margin-bottom:10px;">Memeriksa status email...
+        </div>
+        <div class="grid">
+          <div>
+            <label data-i18n="lbl_app_name">Nama Lengkap Pelamar (untuk Email HRD)</label>
+            <input id="sess_applicant_name" type="text" data-i18n-placeholder="ph_app_name"
+              placeholder="Nama lengkap Anda" />
+          </div>
+          <div>
+            <label data-i18n="lbl_smtp_email">Email Pengirim</label>
+            <input id="sess_smtp_email" type="email" placeholder="email.anda@example.com" />
+          </div>
+          <div>
+            <label data-i18n="lbl_smtp_pass">Email Password</label>
+            <input id="sess_smtp_pass" type="password" data-i18n-placeholder="ph_smtp_pass"
+              placeholder="Password / App Password email Anda" />
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <label data-i18n="lbl_email_subject">Subject</label>
+          <input id="sess_email_subject" type="text" data-i18n-placeholder="ph_email_subject"
+            placeholder="Opsional — contoh: Lamaran Kerja - Posisi - Nama" />
+        </div>
+        <div style="margin-top:12px;">
+          <label data-i18n="lbl_email_body">Body Email</label>
+          <textarea id="sess_email_body" rows="6" data-i18n-placeholder="ph_email_body"
+            placeholder="Opsional — tulis isi body email lamaran Anda di sini..."
+            style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:9px; font-size:14px; background:#fff; color:var(--text); resize:vertical; overflow-y:auto; min-height:130px;"></textarea>
+        </div>
+        <div style="margin-top:12px;">
+          <label data-i18n="lbl_portfolio">Portfolio</label>
+          <select id="sess_attach_portfolio">
+            <option value="false" data-i18n="opt_port_no">Tidak — Jangan lampirkan portfolio</option>
+            <option value="true" data-i18n="opt_port_yes">Ya — Lampirkan Portfolio PDF</option>
+          </select>
+        </div>
+        <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; color:var(--text);">
+          <input id="sess_auto_hrd" type="checkbox" style="width:auto;" checked />
+          <span data-i18n="lbl_auto_hrd">Otomatis kirim CV ke email HRD jika tercantum di deskripsi lowongan</span>
+        </label>
+        <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+          <button class="btn teal" data-i18n="btn_save_hrd" onclick="saveEmailSettings()">Simpan</button>
+          <span id="hrdMsg" class="msg"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="cloud_title">Sesi Login Cloud (Untuk Mode Server / iOS &amp; Android)</h2>
+        <div id="sessionStatus" style="font-size:12px; color:var(--muted); margin-bottom:10px;">Memeriksa status sesi...
+        </div>
+        <div class="grid">
+          <div>
+            <label>LinkedIn Cookie (li_at)</label>
+            <input id="sess_li_at" type="password" data-i18n-placeholder="ph_li_at"
+              placeholder="Tempel nilai cookie li_at (opsional)" />
+          </div>
+          <div>
+            <label data-i18n="lbl_glints_email">Email Login Glints</label>
+            <input id="sess_glints_email" type="email" placeholder="email.glints@gmail.com" />
+          </div>
+          <div>
+            <label data-i18n="lbl_glints_pass">Password Akun Glints</label>
+            <input id="sess_glints_pass" type="password" data-i18n-placeholder="ph_glints_pass"
+              placeholder="Password Glints (opsional)" />
+          </div>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+          <button class="btn" data-i18n="btn_save_sess" onclick="saveCloudSession()">Simpan Sesi Login Cloud</button>
+          <span id="sessMsg" class="msg"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: RIWAYAT -->
+    <div id="tab-history" class="panel">
+      <div class="card" style="overflow-x:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h2 data-i18n="hist_title" style="margin:0;">Riwayat Lamaran</h2>
+          <button class="btn secondary" data-i18n="btn_refresh" style="padding:7px 12px; font-size:12px;"
+            onclick="loadHistory()">Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Portal</th>
+              <th data-i18n="th_position">Posisi</th>
+              <th>Status</th>
+              <th data-i18n="th_time">Waktu</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer style="text-align:center; padding:18px 8px 6px; font-size:12px; color:var(--muted);">
+      <span data-i18n="footer_credit">Dibuat oleh</span>
+      <a href="https://github.com/radja973" target="_blank"
+        style="color:var(--primary); font-weight:700; text-decoration:none;">@radja973</a>
+      <span>(github.com/radja973)</span>
+    </footer>
+  </div>
+
+  <script>
+    const I18N = {
+      id: {
+        tab_control: 'Kontrol Bot', tab_profile: 'Profil & CV', tab_history: 'Riwayat Lamaran',
+        prompt_title: 'Pertanyaan Form Membutuhkan Jawaban Anda:', prompt_placeholder: 'Ketik jawaban di sini (kosong = skip)',
+        btn_send: 'Kirim', run_title: 'Jalankan Otomasi', btn_both: 'Jalankan Keduanya', btn_stop: 'Hentikan',
+        logs_title: 'Log Aktivitas Real-Time', logs_empty: 'Siap dijalankan. Pastikan profil & CV sudah diatur di tab Profil.',
+        upload_title: 'Unggah Resume PDF (Dari iPhone / Android / Laptop)', btn_upload: 'Upload Resume PDF',
+        upload_port_title: 'Upload Portfolio PDF', btn_upload_port: 'Upload',
+        upload_port_link_title: 'Upload Portfolio Link (Opsional)', btn_upload_port_link: 'Upload',
+        upload_cl_title: 'Upload Cover Letter PDF (Opsional)', btn_upload_cl: 'Upload',
+        ph_portfolio_url: 'Tempel link Portfolio (GitHub / Website / Drive)',
+        settings_title: 'Pengaturan Pencarian & Data Lamaran',
+        lbl_keywords: 'Kata Kunci Pekerjaan (pisahkan koma, cth: HRD, Human Resources)',
+        lbl_location: 'Lokasi Pencarian', lbl_domicile: 'Domisili / Kota', lbl_email: 'Email Akun',
+        lbl_country_code: 'Kode Negara', lbl_phone: 'No. HP (tanpa 0/+62)', lbl_years: 'Pengalaman (Tahun)',
+        lbl_curr_salary: 'Gaji Saat Ini', lbl_exp_salary: 'Ekspektasi Gaji', lbl_max_jobs: 'Maksimal Lamaran / Sesi',
+        lbl_job_type: 'Jenis Pekerjaan', opt_all: 'Semua',
+        lbl_strict: 'Fokus Ketat Bidang Pekerjaan',
+        opt_strict_yes: 'Ya — Judul harus cocok dengan kata kunci (Direkomendasikan)',
+        opt_strict_no: 'Tidak — Ikuti semua hasil pencarian portal',
+        lbl_exp_level: 'Level Pengalaman (pisahkan koma, tanpa _)',
+        lbl_exclude: 'Posisi yang Dihindari (Opsional)', ph_exclude: 'cth: Senior, Manager, Magang, Sales',
+        btn_save_cfg: 'Simpan Pengaturan',
+        hrd_title: 'Email HRD Otomatis',
+        lbl_email_subject: 'Subject',
+        ph_email_subject: 'contoh: Lamaran Kerja - Posisi - Nama',
+        lbl_email_body: 'Body Email',
+        ph_email_body: 'Tulis isi body email lamaran Anda di sini...',
+        lbl_hrd_resume: 'Upload Resume',
+        lbl_portfolio: 'Portfolio',
+        opt_port_no: 'Tidak — Jangan lampirkan portfolio',
+        opt_port_yes: 'Ya — Lampirkan Portfolio PDF',
+        btn_save_hrd: 'Simpan',
+        cloud_title: 'Sesi Login Cloud (Untuk Mode Server / iOS & Android)',
+        ph_li_at: 'Tempel nilai cookie li_at (opsional)', lbl_glints_email: 'Email Login Glints',
+        lbl_glints_pass: 'Password Akun Glints', ph_glints_pass: 'Password Glints (opsional)',
+        lbl_app_name: 'Nama Lengkap Pelamar (untuk Email HRD)', ph_app_name: 'Nama lengkap Anda',
+        lbl_smtp_email: 'Email Pengirim', lbl_smtp_pass: 'Email Password',
+        ph_smtp_pass: 'Password / App Password email Anda',
+        lbl_auto_hrd: 'Otomatis kirim CV ke email HRD jika tercantum di deskripsi lowongan',
+        btn_save_sess: 'Simpan Sesi Login Cloud',
+        hist_title: 'Riwayat Lamaran', btn_refresh: 'Refresh', th_position: 'Posisi', th_time: 'Waktu',
+        footer_credit: 'Dibuat oleh',
+        running_prefix: 'Berjalan: ', saved_cfg: 'Pengaturan tersimpan.', saved_hrd: 'Pengaturan email HRD tersimpan.', saved_sess: 'Sesi login cloud tersimpan.'
+      },
+      en: {
+        tab_control: 'Bot Control', tab_profile: 'Profile & Resume', tab_history: 'Application History',
+        prompt_title: 'Form Question Requires Your Input:', prompt_placeholder: 'Type your answer here (empty = skip)',
+        btn_send: 'Send', run_title: 'Run Automation', btn_both: 'Run Both', btn_stop: 'Stop',
+        logs_title: 'Real-Time Activity Logs', logs_empty: 'Ready to run. Make sure your profile & PDF resume are set.',
+        upload_title: 'Upload PDF Resume (From iPhone / Android / Laptop)', btn_upload: 'Upload Resume PDF',
+        upload_port_title: 'Upload Portfolio PDF', btn_upload_port: 'Upload',
+        upload_port_link_title: 'Upload Portfolio Link (Optional)', btn_upload_port_link: 'Upload',
+        upload_cl_title: 'Upload Cover Letter PDF (Optional)', btn_upload_cl: 'Upload',
+        ph_portfolio_url: 'Paste Portfolio link (GitHub / Website / Drive)',
+        settings_title: 'Job Search & Application Settings',
+        lbl_keywords: 'Job Keywords (comma-separated, e.g. HRD, Human Resources)',
+        lbl_location: 'Search Location', lbl_domicile: 'Domicile / City', lbl_email: 'Account Email',
+        lbl_country_code: 'Country Code', lbl_phone: 'Phone Number (without 0/+62)', lbl_years: 'Experience (Years)',
+        lbl_curr_salary: 'Current Salary', lbl_exp_salary: 'Expected Salary', lbl_max_jobs: 'Max Applications / Session',
+        lbl_job_type: 'Job Type', opt_all: 'All',
+        lbl_strict: 'Strict Job Field Focus',
+        opt_strict_yes: 'Yes — Job title must match keywords (Recommended)',
+        opt_strict_no: 'No — Follow all portal search results',
+        lbl_exp_level: 'Experience Level (comma-separated)',
+        lbl_exclude: 'Positions to Avoid (Optional)', ph_exclude: 'e.g. Senior, Manager, Intern, Sales',
+        btn_save_cfg: 'Save Settings',
+        hrd_title: 'Auto HRD Email',
+        lbl_email_subject: 'Subject',
+        ph_email_subject: 'e.g. Job Application - Position - Name',
+        lbl_email_body: 'Body Email',
+        ph_email_body: 'Write your application email body here...',
+        lbl_hrd_resume: 'Upload Resume',
+        lbl_portfolio: 'Portfolio',
+        opt_port_no: 'No — Do not attach portfolio',
+        opt_port_yes: 'Yes — Attach Portfolio PDF',
+        btn_save_hrd: 'Save',
+        cloud_title: 'Cloud Login Session (For Server Mode / iOS & Android)',
+        ph_li_at: 'Paste li_at cookie value (optional)', lbl_glints_email: 'Glints Login Email',
+        lbl_glints_pass: 'Glints Account Password', ph_glints_pass: 'Glints Password (optional)',
+        lbl_app_name: 'Applicant Full Name (for HRD Email)', ph_app_name: 'Your full name',
+        lbl_smtp_email: 'Sender Email', lbl_smtp_pass: 'Email Password',
+        ph_smtp_pass: 'Your email password / App Password',
+        lbl_auto_hrd: 'Automatically send resume to HRD email if mentioned in job description',
+        btn_save_sess: 'Save Cloud Login Session',
+        hist_title: 'Application History', btn_refresh: 'Refresh', th_position: 'Position', th_time: 'Time',
+        footer_credit: 'Created by',
+        running_prefix: 'Running: ', saved_cfg: 'Settings saved.', saved_hrd: 'HRD email settings saved.', saved_sess: 'Cloud login session saved.'
+      }
+    };
+
+    const STATUS_EN = {
+      'Lamaran Terkirim': 'Application Sent',
+      'Terkirim via Email HRD': 'Sent via HRD Email',
+      'Sudah Pernah Dilamar': 'Already Applied',
+      'Lamaran Eksternal / Ditutup': 'External / Closed',
+      'Dialihkan ke Web Perusahaan': 'Redirected to Company Site',
+      'Butuh Jawaban Khusus (Dilewati)': 'Custom Input Needed (Skipped)',
+      'Dilewati oleh Anda': 'Skipped by You',
+      'Waktu Pengisian Form Habis': 'Form Timed Out',
+      'Perlu Login Ulang': 'Login Required',
+      'Gagal Mengirim (Perlu Coba Lagi)': 'Failed to Send (Retry)'
+    };
+
+    let currentLang = localStorage.getItem('autoapply_lang') || '';
+
+    async function initLanguage() {
+      if (!currentLang) {
+        try {
+          const res = await fetch('/api/lang');
+          const d = await res.json();
+          currentLang = d.lang || 'id';
+        } catch (e) {
+          currentLang = 'id';
+        }
+      }
+      setLanguage(currentLang);
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('autoapply_lang', lang);
+      document.getElementById('langIdBtn').classList.toggle('active', lang === 'id');
+      document.getElementById('langEnBtn').classList.toggle('active', lang === 'en');
+      const dict = I18N[lang] || I18N.id;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (dict[key]) el.placeholder = dict[key];
+      });
+      loadHistory();
+      loadSessionStatus();
+    }
+
+    function switchTab(name, btn) {
+      const targetPanel = document.getElementById('tab-' + name);
+      if (!targetPanel) return;
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      targetPanel.classList.add('active');
+      if (btn) btn.classList.add('active');
+      localStorage.setItem('autoapply_tab', name);
+      if (name === 'history') loadHistory();
+    }
+
+    async function loadConfig() {
+      const res = await fetch('/api/config');
+      const cfg = await res.json();
+      document.getElementById('cfg_keywords').value = cfg.keywords || '';
+      document.getElementById('cfg_location').value = cfg.location || '';
+      document.getElementById('cfg_domicile').value = cfg.domicile || '';
+      document.getElementById('cfg_email').value = cfg.email || '';
+      document.getElementById('cfg_country_code').value = cfg.country_code || '+62';
+      document.getElementById('cfg_phone_number').value = cfg.phone_number || '';
+      document.getElementById('cfg_years').value = cfg.years_of_experience_default || '1';
+      document.getElementById('cfg_current_salary').value = cfg.current_salary || '';
+      document.getElementById('cfg_expected_salary').value = cfg.expected_salary || '';
+      document.getElementById('cfg_max_jobs').value = cfg.max_jobs_to_apply || 30;
+      document.getElementById('cfg_job_type').value = cfg.job_type || (cfg.remote_only ? 'remote' : 'semua');
+      document.getElementById('cfg_strict_title').value = (cfg.strict_title_match === false) ? 'false' : 'true';
+      document.getElementById('cfg_exp_levels').value = Array.isArray(cfg.experience_level) ? cfg.experience_level.join(', ') : (cfg.experience_level || '');
+      document.getElementById('cfg_exclude_keywords').value = Array.isArray(cfg.exclude_keywords) ? cfg.exclude_keywords.join(', ') : (cfg.exclude_keywords || '');
+      document.getElementById('cfg_portfolio_url').value = cfg.portfolio_url || '';
+      document.getElementById('currentResume').textContent = 'Resume Aktif: ' + (cfg.resume_pdf_path || 'Belum diatur');
+      const portParts = [];
+      if (cfg.portfolio_pdf_path) portParts.push('PDF: ' + cfg.portfolio_pdf_path);
+      if (cfg.portfolio_url) portParts.push('Link: ' + cfg.portfolio_url);
+      document.getElementById('currentPortfolio').textContent = 'Portfolio Aktif: ' + (portParts.length ? portParts.join('  |  ') : 'Belum diatur');
+      document.getElementById('currentCoverLetter').textContent = 'Cover Letter Aktif: ' + (cfg.cover_letter_pdf_path || 'Belum diunggah');
+      loadSessionStatus();
+    }
+
+    let smtpAlreadyReady = false;
+
+    async function loadSessionStatus() {
+      try {
+        const res = await fetch('/api/session/status');
+        const s = await res.json();
+        smtpAlreadyReady = Boolean(s.smtp_ready);
+        const liText = s.linkedin_cookie_set ? (currentLang === 'en' ? 'LinkedIn: Saved' : 'LinkedIn: Tersimpan') : (currentLang === 'en' ? 'LinkedIn: Not set' : 'LinkedIn: Belum diatur');
+        const glText = s.glints_auth_set ? (currentLang === 'en' ? 'Glints: Saved' : 'Glints: Tersimpan') : (currentLang === 'en' ? 'Glints: Not set' : 'Glints: Belum diatur');
+        const emText = s.smtp_ready ? (currentLang === 'en' ? 'HRD Email Status: Ready' : 'Status Email HRD: Siap') : (currentLang === 'en' ? 'HRD Email Status: Not set' : 'Status Email HRD: Belum diatur');
+        document.getElementById('hrdStatus').textContent = emText;
+        document.getElementById('sessionStatus').textContent = liText + '  |  ' + glText;
+        if (s.applicant_name) document.getElementById('sess_applicant_name').value = s.applicant_name;
+        if (s.smtp_email) document.getElementById('sess_smtp_email').value = s.smtp_email;
+        if (typeof s.hrd_email_subject === 'string') document.getElementById('sess_email_subject').value = s.hrd_email_subject;
+        if (typeof s.hrd_email_body === 'string') document.getElementById('sess_email_body').value = s.hrd_email_body;
+        document.getElementById('sess_attach_portfolio').value = s.hrd_attach_portfolio ? 'true' : 'false';
+        if (s.hrd_resume_filename) document.getElementById('hrdResumeInfo').textContent = 'Resume: ' + s.hrd_resume_filename;
+        document.getElementById('sess_auto_hrd').checked = s.auto_send_hrd_email !== false;
+      } catch (e) { }
+    }
+
+    function _validatePdfInput(inp, msgEl) {
+      inp.classList.remove('input-error');
+      if (!inp.files || !inp.files.length) return false;
+      const f = inp.files[0];
+      const isPdfExt = f.name.toLowerCase().endsWith('.pdf');
+      const isPdfMime = !f.type || f.type === 'application/pdf';
+      if (!isPdfExt || !isPdfMime) {
+        inp.value = '';
+        inp.classList.add('input-error');
+        const warn = currentLang === 'en'
+          ? 'Only PDF (.pdf) files are allowed. Your file was rejected.'
+          : 'Format file harus PDF (.pdf). File Anda ditolak.';
+        if (msgEl) {
+          msgEl.style.color = 'var(--danger)';
+          msgEl.textContent = warn;
+        }
+        alert(warn);
+        return false;
+      }
+      if (msgEl) {
+        msgEl.style.color = 'var(--teal)';
+        msgEl.textContent = '';
+      }
+      return true;
+    }
+
+    [
+      ['resumeFile', 'resumeMsg'],
+      ['portfolioFile', 'portfolioMsg'],
+      ['coverLetterFile', 'coverLetterMsg']
+    ].forEach(([fid, mid]) => {
+      const fEl = document.getElementById(fid);
+      const mEl = document.getElementById(mid);
+      if (fEl) fEl.addEventListener('change', () => _validatePdfInput(fEl, mEl));
+    });
+
+    async function savePortfolioLink() {
+      const urlEl = document.getElementById('cfg_portfolio_url');
+      const msgEl = document.getElementById('portfolioLinkMsg');
+      urlEl.classList.remove('input-error');
+      const url = urlEl.value.trim();
+      if (!url) {
+        alert(currentLang === 'en' ? 'No portfolio link entered to save.' : 'Tidak ada link portfolio yang dimasukkan untuk disimpan.');
+        return;
+      }
+      let validUrl = false;
+      try {
+        const parsed = new URL(url);
+        validUrl = (parsed.protocol === 'http:' || parsed.protocol === 'https:');
+      } catch (e) {}
+      if (!validUrl) {
+        urlEl.classList.add('input-error');
+        const warn = currentLang === 'en'
+          ? 'Invalid link format. Please start with https:// or http://'
+          : 'Format link tidak valid. Harap awali dengan https:// atau http://';
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = warn;
+        alert(warn);
+        return;
+      }
+      msgEl.style.color = 'var(--teal)';
+      const res = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ portfolio_url: url })
+      });
+      if (res.ok) {
+        msgEl.textContent = currentLang === 'en' ? 'Portfolio link uploaded.' : 'Link portfolio terunggah.';
+        loadConfig();
+        setTimeout(() => msgEl.textContent = '', 3000);
+      }
+    }
+
+    async function uploadPortfolio() {
+      const inp = document.getElementById('portfolioFile');
+      const msgEl = document.getElementById('portfolioMsg');
+      if (!inp.files.length) return alert(currentLang === 'en' ? 'Please choose a Portfolio PDF first.' : 'Pilih file Portfolio PDF terlebih dahulu.');
+      if (!_validatePdfInput(inp, msgEl)) return;
+      const fd = new FormData();
+      fd.append('file', inp.files[0]);
+      const res = await fetch('/api/upload-portfolio', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok) {
+        msgEl.style.color = 'var(--teal)';
+        msgEl.textContent = (currentLang === 'en' ? 'Uploaded: ' : 'Terunggah: ') + data.filename;
+        document.getElementById('currentPortfolio').textContent = 'Portfolio Aktif: ' + data.portfolio_pdf_path;
+      } else {
+        inp.value = '';
+        inp.classList.add('input-error');
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = data.detail || 'Gagal upload portfolio.';
+        alert(data.detail || 'Gagal upload portfolio.');
+      }
+    }
+
+    async function uploadCoverLetter() {
+      const inp = document.getElementById('coverLetterFile');
+      const msgEl = document.getElementById('coverLetterMsg');
+      if (!inp.files.length) return alert(currentLang === 'en' ? 'Please choose a Cover Letter PDF first.' : 'Pilih file Cover Letter PDF terlebih dahulu.');
+      if (!_validatePdfInput(inp, msgEl)) return;
+      const fd = new FormData();
+      fd.append('file', inp.files[0]);
+      const res = await fetch('/api/upload-cover-letter', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok) {
+        msgEl.style.color = 'var(--teal)';
+        msgEl.textContent = (currentLang === 'en' ? 'Uploaded: ' : 'Terunggah: ') + data.filename;
+        document.getElementById('currentCoverLetter').textContent = 'Cover Letter Aktif: ' + data.cover_letter_pdf_path;
+      } else {
+        inp.value = '';
+        inp.classList.add('input-error');
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = data.detail || 'Gagal upload cover letter.';
+        alert(data.detail || 'Gagal upload cover letter.');
+      }
+    }
+
+    function _cleanLabelText(el) {
+      const raw = el.closest('div')?.querySelector('label')?.textContent || '';
+      return raw.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function _showMissingWarning(msgEl, missingLabels, totalRequired) {
+      msgEl.style.color = 'var(--danger)';
+      if (missingLabels.length === totalRequired) {
+        msgEl.textContent = currentLang === 'en' ? 'Please fill in all fields' : 'Harap isi semua kolom';
+      } else {
+        const prefix = currentLang === 'en' ? 'Please fill in: ' : 'Harap isi kolom: ';
+        msgEl.textContent = prefix + missingLabels.join(', ');
+      }
+    }
+
+    function _hasEmailDomainDot(val) {
+      return /^[^\s@]+@[^\s@]+\./.test((val || '').trim());
+    }
+
+    function _isCompleteEmail(val) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((val || '').trim());
+    }
+
+    ['cfg_email', 'sess_smtp_email', 'sess_glints_email'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          const v = el.value.trim();
+          if (v && !_hasEmailDomainDot(v)) {
+            el.classList.add('input-error');
+          } else {
+            el.classList.remove('input-error');
+          }
+        });
+      }
+    });
+
+    const smtpPassEl = document.getElementById('sess_smtp_pass');
+    if (smtpPassEl) {
+      smtpPassEl.addEventListener('input', () => {
+        const cleanLen = smtpPassEl.value.replace(/\s+/g, '').length;
+        if (cleanLen > 0 && cleanLen < 8) {
+          smtpPassEl.classList.add('input-error');
+        } else {
+          smtpPassEl.classList.remove('input-error');
+        }
+      });
+    }
+
+    ['sess_applicant_name', 'sess_email_subject', 'sess_email_body'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => el.classList.remove('input-error'));
+    });
+
+    async function saveEmailSettings() {
+      const nameEl = document.getElementById('sess_applicant_name');
+      const emailEl = document.getElementById('sess_smtp_email');
+      const passEl = document.getElementById('sess_smtp_pass');
+      const subjEl = document.getElementById('sess_email_subject');
+      const bodyEl = document.getElementById('sess_email_body');
+      [nameEl, emailEl, passEl, subjEl, bodyEl].forEach(el => el.classList.remove('input-error'));
+
+      const appName = nameEl.value.trim();
+      const smtpEmail = emailEl.value.trim();
+      const smtpPass = passEl.value.trim();
+      const emailSubj = subjEl.value.trim();
+      const emailBody = bodyEl.value.trim();
+      const msgEl = document.getElementById('hrdMsg');
+
+      const requiredEmailChecks = [
+        { el: nameEl, empty: !appName },
+        { el: emailEl, empty: !smtpEmail },
+        { el: passEl, empty: !smtpPass && !smtpAlreadyReady },
+        { el: subjEl, empty: !emailSubj },
+        { el: bodyEl, empty: !emailBody }
+      ];
+      const activeTotal = smtpAlreadyReady ? 4 : 5;
+      const missingLabels = [];
+      requiredEmailChecks.forEach(item => {
+        if (item.empty) {
+          item.el.classList.add('input-error');
+          const lbl = _cleanLabelText(item.el);
+          if (lbl) missingLabels.push(lbl);
+        }
+      });
+
+      if (missingLabels.length > 0) {
+        _showMissingWarning(msgEl, missingLabels, activeTotal);
+        return;
+      }
+      if (!_isCompleteEmail(smtpEmail)) {
+        emailEl.classList.add('input-error');
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = currentLang === 'en' ? 'Invalid email format' : 'Format email tidak valid';
+        return;
+      }
+      if (smtpPass && smtpPass.replace(/\s+/g, '').length < 8) {
+        passEl.classList.add('input-error');
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = currentLang === 'en' ? 'Email Password must be at least 8 characters' : 'Email Password minimal 8 karakter';
+        return;
+      }
+      msgEl.style.color = 'var(--teal)';
+
+      const payload = {
+        applicant_name: appName,
+        smtp_email: smtpEmail,
+        smtp_app_password: smtpPass,
+        hrd_email_subject: document.getElementById('sess_email_subject').value,
+        hrd_email_body: document.getElementById('sess_email_body').value,
+        hrd_attach_portfolio: document.getElementById('sess_attach_portfolio').value === 'true',
+        auto_send_hrd_email: document.getElementById('sess_auto_hrd').checked
+      };
+      const res = await fetch('/api/session/save', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        document.getElementById('sess_smtp_pass').value = '';
+        const dict = I18N[currentLang] || I18N.id;
+        document.getElementById('hrdMsg').textContent = dict.saved_hrd;
+        loadSessionStatus();
+        setTimeout(() => document.getElementById('hrdMsg').textContent = '', 3000);
+      }
+    }
+
+    async function saveCloudSession() {
+      const payload = {
+        linkedin_li_at: document.getElementById('sess_li_at').value,
+        glints_email: document.getElementById('sess_glints_email').value,
+        glints_password: document.getElementById('sess_glints_pass').value
+      };
+      const res = await fetch('/api/session/save', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        document.getElementById('sess_li_at').value = '';
+        document.getElementById('sess_glints_pass').value = '';
+        const dict = I18N[currentLang] || I18N.id;
+        document.getElementById('sessMsg').textContent = dict.saved_sess;
+        loadSessionStatus();
+        setTimeout(() => document.getElementById('sessMsg').textContent = '', 3000);
+      }
+    }
+
+    const REQUIRED_CFG_IDS = [
+      'cfg_keywords', 'cfg_location', 'cfg_domicile', 'cfg_email',
+      'cfg_country_code', 'cfg_phone_number', 'cfg_years',
+      'cfg_current_salary', 'cfg_expected_salary', 'cfg_max_jobs'
+    ];
+    REQUIRED_CFG_IDS.forEach(id => {
+      if (id === 'cfg_email') return;
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => el.classList.remove('input-error'));
+    });
+
+    async function saveConfig() {
+      const saveMsgEl = document.getElementById('saveMsg');
+      const missingCfgLabels = [];
+      REQUIRED_CFG_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('input-error');
+        if (!el.value.trim()) {
+          el.classList.add('input-error');
+          const lbl = _cleanLabelText(el);
+          if (lbl) missingCfgLabels.push(lbl);
+        }
+      });
+
+      if (missingCfgLabels.length > 0) {
+        _showMissingWarning(saveMsgEl, missingCfgLabels, REQUIRED_CFG_IDS.length);
+        return;
+      }
+      const cfgEmailEl = document.getElementById('cfg_email');
+      if (!_isCompleteEmail(cfgEmailEl.value)) {
+        cfgEmailEl.classList.add('input-error');
+        saveMsgEl.style.color = 'var(--danger)';
+        saveMsgEl.textContent = currentLang === 'en' ? 'Invalid email format' : 'Format email tidak valid';
+        return;
+      }
+      saveMsgEl.style.color = 'var(--teal)';
+
+      const payload = {
+        keywords: document.getElementById('cfg_keywords').value,
+        location: document.getElementById('cfg_location').value,
+        domicile: document.getElementById('cfg_domicile').value,
+        email: document.getElementById('cfg_email').value,
+        country_code: document.getElementById('cfg_country_code').value,
+        phone_number: document.getElementById('cfg_phone_number').value,
+        years_of_experience_default: document.getElementById('cfg_years').value,
+        current_salary: document.getElementById('cfg_current_salary').value,
+        expected_salary: document.getElementById('cfg_expected_salary').value,
+        max_jobs_to_apply: parseInt(document.getElementById('cfg_max_jobs').value || '30', 10),
+        job_type: document.getElementById('cfg_job_type').value,
+        remote_only: document.getElementById('cfg_job_type').value === 'remote',
+        strict_title_match: document.getElementById('cfg_strict_title').value === 'true',
+        experience_level: document.getElementById('cfg_exp_levels').value.split(',').map(s => s.trim()).filter(Boolean),
+        exclude_keywords: document.getElementById('cfg_exclude_keywords').value.split(',').map(s => s.trim()).filter(Boolean)
+      };
+      const res = await fetch('/api/config', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        document.getElementById('saveMsg').textContent = 'Pengaturan tersimpan.';
+        setTimeout(() => document.getElementById('saveMsg').textContent = '', 3000);
+      }
+    }
+
+    async function uploadResume() {
+      const inp = document.getElementById('resumeFile');
+      const msgEl = document.getElementById('resumeMsg');
+      if (!inp.files.length) return alert(currentLang === 'en' ? 'Please choose a PDF file first.' : 'Pilih file PDF terlebih dahulu.');
+      if (!_validatePdfInput(inp, msgEl)) return;
+      const fd = new FormData();
+      fd.append('file', inp.files[0]);
+      const res = await fetch('/api/upload-resume', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (res.ok) {
+        msgEl.style.color = 'var(--teal)';
+        msgEl.textContent = (currentLang === 'en' ? 'Uploaded: ' : 'Terunggah: ') + data.filename;
+        document.getElementById('currentResume').textContent = 'Resume Aktif: ' + data.resume_pdf_path;
+      } else {
+        inp.value = '';
+        inp.classList.add('input-error');
+        msgEl.style.color = 'var(--danger)';
+        msgEl.textContent = data.detail || 'Gagal upload Resume.';
+        alert(data.detail || 'Gagal upload Resume.');
+      }
+    }
+
+    async function startBot(portal) {
+      const res = await fetch('/api/run/' + portal, { method: 'POST' });
+      if (!res.ok) {
+        const d = await res.json();
+        alert(d.detail || 'Gagal menjalankan bot.');
+      }
+      pollStatus();
+    }
+
+    async function startDirectUrl() {
+      const url = document.getElementById('directJobUrl').value.trim();
+      if (!url) return alert('Tempel URL lowongan LinkedIn atau Glints terlebih dahulu.');
+      const res = await fetch('/api/run-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        alert(d.detail || 'Gagal menjalankan bot.');
+      }
+      pollStatus();
+    }
+
+    async function stopBot() {
+      await fetch('/api/stop', { method: 'POST' });
+      pollStatus();
+    }
+
+    async function submitPromptAnswer(val) {
+      await fetch('/api/prompt/answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answer: val })
+      });
+      document.getElementById('promptInput').value = '';
+      pollStatus();
+    }
+
+    function submitPromptText() {
+      submitPromptAnswer(document.getElementById('promptInput').value);
+    }
+
+    let lastPromptKey = '';
+    async function pollStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const st = await res.json();
+        const badge = document.getElementById('statusBadge');
+        badge.textContent = st.running ? ('Berjalan: ' + st.active_portal) : 'Idle';
+        badge.className = 'badge' + (st.running ? ' running' : '');
+
+        ['btnLinkedin', 'btnGlints', 'btnBoth'].forEach(id => {
+          document.getElementById(id).disabled = st.running;
+        });
+        document.getElementById('btnStop').disabled = !st.running;
+
+        const logBox = document.getElementById('logBox');
+        if (st.logs && st.logs.length) {
+          logBox.textContent = st.logs.join('\n');
+          logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        const pBox = document.getElementById('promptBox');
+        if (st.pending_prompt) {
+          pBox.classList.add('visible');
+          const key = st.pending_prompt.question + '|' + (st.pending_prompt.options || []).length;
+          if (key !== lastPromptKey) {
+            lastPromptKey = key;
+            document.getElementById('promptQuestion').textContent = st.pending_prompt.question;
+            const optsDiv = document.getElementById('promptOptions');
+            optsDiv.innerHTML = '';
+            const opts = st.pending_prompt.options || [];
+            if (opts.length > 0) {
+              opts.forEach((opt, i) => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.textContent = '[' + (i + 1) + '] ' + opt;
+                b.onclick = () => submitPromptAnswer(String(i + 1));
+                optsDiv.appendChild(b);
+              });
+              document.getElementById('promptTextWrap').style.display = 'none';
+            } else {
+              document.getElementById('promptTextWrap').style.display = 'flex';
+            }
+          }
+        } else {
+          pBox.classList.remove('visible');
+          lastPromptKey = '';
+        }
+      } catch (e) { }
+    }
+
+    async function loadHistory() {
+      const res = await fetch('/api/history');
+      const data = await res.json();
+      const tbody = document.getElementById('historyBody');
+      tbody.innerHTML = '';
+      (data.items || []).forEach(item => {
+        const tr = document.createElement('tr');
+        const toneClass = item.tone ? (' ' + item.tone) : '';
+        const statusLabel = (currentLang === 'en' && STATUS_EN[item.status]) ? STATUS_EN[item.status] : item.status;
+        tr.innerHTML = `
+          <td>${item.portal}</td>
+          <td><a href="${item.link}" target="_blank" style="color:var(--primary);text-decoration:none;">${item.title}</a></td>
+          <td><span class="status-pill${toneClass}">${statusLabel}</span></td>
+          <td style="color:var(--muted);font-size:12px;">${item.timestamp}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    const savedTab = localStorage.getItem('autoapply_tab') || 'control';
+    switchTab(savedTab, document.getElementById('tabBtn-' + savedTab));
+    initLanguage();
+    loadConfig();
+    pollStatus();
+    setInterval(pollStatus, 1500);
+  </script>
+</body>
+
+</html>
